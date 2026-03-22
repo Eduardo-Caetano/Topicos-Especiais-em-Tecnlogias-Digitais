@@ -1,0 +1,6 @@
+@ProjetoTETD_HostAddress = http://localhost:5171
+
+GET {{ProjetoTETD_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
