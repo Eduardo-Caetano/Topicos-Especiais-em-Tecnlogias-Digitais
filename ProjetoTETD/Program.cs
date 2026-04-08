@@ -1,44 +1,108 @@
+using ScrumBoardApi.Models;
+using ScrumBoardApi.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// ── Serviços ──────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<CardService>();
+
+// ── CORS (permite o frontend se conectar) ─────────────
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// ── Middlewares ────────────────────────────────────────
+app.UseSwagger();
+app.UseSwaggerUI();
+app.UseCors();
 
-app.UseHttpsRedirection();
+// ── Endpoints ─────────────────────────────────────────
 
-var summaries = new[]
+// GET /api/cards → Retorna todos os cards
+app.MapGet("/api/cards", (CardService svc) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    return Results.Ok(svc.GetAll());
 })
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+.WithName("GetAllCards")
+.WithTags("Cards");
+
+// GET /api/cards/{id} → Retorna um card pelo ID
+app.MapGet("/api/cards/{id:guid}", (Guid id, CardService svc) =>
+{
+    var card = svc.GetById(id);
+    return card is not null ? Results.Ok(card) : Results.NotFound();
+})
+.WithName("GetCardById")
+.WithTags("Cards");
+
+// GET /api/cards/status/{status} → Retorna cards filtrados por status
+app.MapGet("/api/cards/status/{status}", (string status, CardService svc) =>
+{
+    var cards = svc.GetByStatus(status);
+    return Results.Ok(cards);
+})
+.WithName("GetCardsByStatus")
+.WithTags("Cards");
+
+// POST /api/cards → Cria um novo card
+app.MapPost("/api/cards", (Card card, CardService svc) =>
+{
+    var created = svc.Add(card);
+    return Results.Created($"/api/cards/{created.Id}", created);
+})
+.WithName("CreateCard")
+.WithTags("Cards");
+
+// PUT /api/cards/{id} → Atualiza um card existente
+app.MapPut("/api/cards/{id:guid}", (Guid id, Card updated, CardService svc) =>
+{
+    var card = svc.Update(id, updated);
+    return card is not null ? Results.Ok(card) : Results.NotFound();
+})
+.WithName("UpdateCard")
+.WithTags("Cards");
+
+// PATCH /api/cards/{id}/move → Move um card para outra coluna
+app.MapPatch("/api/cards/{id:guid}/move", (Guid id, MoveRequest request, CardService svc) =>
+{
+    // Status válidos
+    string[] validStatuses = { "Backlog", "ToDo", "Doing", "Testing", "Done" };
+
+    if (!validStatuses.Contains(request.Status, StringComparer.OrdinalIgnoreCase))
+    {
+        return Results.BadRequest(new
+        {
+            error = "Status inválido",
+            validStatuses
+        });
+    }
+
+    var card = svc.MoveCard(id, request.Status);
+    return card is not null ? Results.Ok(card) : Results.NotFound();
+})
+.WithName("MoveCard")
+.WithTags("Cards");
+
+// DELETE /api/cards/{id} → Remove um card
+app.MapDelete("/api/cards/{id:guid}", (Guid id, CardService svc) =>
+{
+    return svc.Delete(id) ? Results.NoContent() : Results.NotFound();
+})
+.WithName("DeleteCard")
+.WithTags("Cards");
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+// ── Records auxiliares ────────────────────────────────
+// Record usado para receber o novo status no endpoint de mover card
+public record MoveRequest(string Status);

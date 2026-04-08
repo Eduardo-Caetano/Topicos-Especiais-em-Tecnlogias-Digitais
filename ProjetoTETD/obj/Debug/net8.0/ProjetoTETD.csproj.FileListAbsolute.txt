@@ -31,3 +31,4 @@ C:\Users\Eduardo\Documents\GitHub\Topicos-Especiais-em-Tecnlogias-Digitais\Proje
 C:\Users\Eduardo\Documents\GitHub\Topicos-Especiais-em-Tecnlogias-Digitais\ProjetoTETD\obj\Debug\net8.0\ProjetoTETD.pdb
 C:\Users\Eduardo\Documents\GitHub\Topicos-Especiais-em-Tecnlogias-Digitais\ProjetoTETD\obj\Debug\net8.0\ProjetoTETD.genruntimeconfig.cache
 C:\Users\Eduardo\Documents\GitHub\Topicos-Especiais-em-Tecnlogias-Digitais\ProjetoTETD\obj\Debug\net8.0\ref\ProjetoTETD.dll
+C:\Users\Eduardo\Documents\GitHub\Topicos-Especiais-em-Tecnlogias-Digitais\ProjetoTETD\obj\Debug\net8.0\ProjetoTETD.sourcelink.json
