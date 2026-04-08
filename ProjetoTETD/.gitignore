@@ -1,0 +1,17 @@
+# Build folders
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Arquivos gerados
+*.dll
+*.exe
+*.pdb
+
+# Outros
+*.cache
+*.log
