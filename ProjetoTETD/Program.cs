@@ -57,9 +57,31 @@ app.MapGet("/api/cards/status/{status}", (string status, CardService svc) =>
 // POST /api/cards → Cria um novo card
 app.MapPost("/api/cards", (Card card, CardService svc) =>
 {
+    string[] validPriorities = { "Low", "Medium", "High", "Urgent" };
+    string[] validStatuses = { "Backlog", "ToDo", "Doing", "Testing", "Done" };
+
+    // Title
+    if (string.IsNullOrWhiteSpace(card.Title))
+    {
+        return Results.BadRequest("Title não pode ser vazio");
+    }
+
+    // Priority
+    if (!validPriorities.Contains(card.Priority, StringComparer.OrdinalIgnoreCase))
+    {
+        return Results.BadRequest("Priority inválido");
+    }
+
+    // Status
+    if (!validStatuses.Contains(card.Status, StringComparer.OrdinalIgnoreCase))
+    {
+        return Results.BadRequest("Status inválido");
+    }
+
     var created = svc.Add(card);
     return Results.Created($"/api/cards/{created.Id}", created);
 })
+
 .WithName("CreateCard")
 .WithTags("Cards");
 
