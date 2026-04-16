@@ -20,8 +20,8 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 # Define a porta que a aplicação escuta
-ENV ASPNETCORE_URLS=http://+:80
-EXPOSE 80
+ENV ASPNETCORE_URLS=http://+:10000
+EXPOSE 10000
 
 # Comando para iniciar a aplicação
-ENTRYPOINT ["dotnet", "MeuBackend.dll"]
+ENTRYPOINT ["dotnet", "ProjetoTETD.dll"]

@@ -1,0 +1,12 @@
+# .dockerignore para React
+node_modules
+dist
+build
+.git
+.gitignore
+.env
+.env.local
+README.md
+Dockerfile
+docker-compose.yml
+.dockerignore
